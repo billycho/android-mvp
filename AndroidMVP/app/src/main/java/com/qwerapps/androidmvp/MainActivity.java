@@ -3,10 +3,17 @@ package com.qwerapps.androidmvp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.qwerapps.androidmvp.model.Ads;
+import com.qwerapps.androidmvp.model.AdsResponse;
+import com.qwerapps.androidmvp.rest.ApiClient;
+import com.qwerapps.androidmvp.rest.ApiInterface;
+
+import java.util.List;
 import java.util.function.Consumer;
 
 import butterknife.BindView;
@@ -17,6 +24,9 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,53 +38,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        BattleOfBastards a = new BattleOfBastards();
-//        a.startWar();
+        ButterKnife.bind(this);
 
-//        ButterKnife.bind(this);
-//        title.setText("Hello from Butterknife");
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
 
-        Observable<Integer> observable = Observable.create(new ObservableOnSubscribe<Integer>() {
+        Call<AdsResponse> call = apiService.getAds("1");
+        call.enqueue(new Callback<AdsResponse>() {
             @Override
-            public void subscribe(ObservableEmitter<Integer> e) throws Exception {
-                e.onNext(1);
-                e.onNext(2);
-                e.onNext(3);
-                e.onNext(4);
+            public void onResponse(Call<AdsResponse> call, Response<AdsResponse> response) {
+                Log.d("asdaxxx",Integer.toString(response.body().getAds().size()));
+                List<Ads> ads = response.body().getAds();
 
-                e.onComplete();;
+                for(int i = 0;i<ads.size();i++)
+                {
+                    Log.d("asdaxxx",ads.get(i).getCode());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AdsResponse> call, Throwable t) {
+
             }
         });
-
-
-
-        Observer<Integer> observer = new Observer<Integer>(){
-            @Override
-            public void onSubscribe(Disposable d)
-            {
-                Log.e("asda", "onSubscribe: ");
-            }
-
-            @Override
-            public void onNext(Integer value)
-            {
-                Log.e("asda", "onNext: " + value);
-            }
-
-            @Override
-            public void onError(Throwable e)
-            {
-                Log.e("asda","onError: " );
-            }
-
-            @Override
-            public void onComplete()
-            {
-                Log.e("asda","onComplete: All Done!");
-            }
-        };
-
-        observable.subscribe(observer);
 
 
     }
